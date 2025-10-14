@@ -1,0 +1,8 @@
+name: 'Site Config for stage'
+description: 'The domain plus TLD and theme settings of the site to deploy'
+
+config:
+  sitepath: 'plottcreative.co.uk/stage/'
+  stagefolder: '${$stage_folder}/'
+  themepath: 'wp-content/themes/${live_theme}/'
+  environment: 'stage'
