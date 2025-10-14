@@ -8,4 +8,4 @@
    - `DDEV config --project-name={$sitename} --project-type=wordpress --docroot=web` 
    - `DDEV add-on get ddev/ddev-adminer`
 5. Import db
-6. Establish a composer.josn ( take the most recent project and remove all requires )
+6. Establish a composer.json ( or use this [example](https://github.com/ewan-plott/plott-pipe-md/blob/main/example.composer.json) ) 
