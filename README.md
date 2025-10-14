@@ -31,4 +31,6 @@
    "php save_composer_lock.php"
 ]
 ```
-10. Create `.github/` folder with appropriate workflows.
+10. Create `.github/` folder and set-up appropriate config & workflows.
+   - update *sitepaths* and *themepaths* 
+   - check branch it's pushing to *main* or *master*
