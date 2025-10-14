@@ -31,6 +31,6 @@
    "php save_composer_lock.php"
 ]
 ```
-10. Create `.github/` folder and set-up appropriate config & workflows.
+10. Create `.github/` folder ( example found [here](https://github.com/ewan-plott/plott-pipe-md/tree/main/.github) ) and set-up appropriate config & workflows.
    - update *sitepaths* and *themepaths* 
    - check branch it's pushing to *main* or *master*
