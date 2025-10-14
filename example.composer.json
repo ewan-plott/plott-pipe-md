@@ -1,0 +1,57 @@
+{
+  "name": "plottcreative/plottos",
+  "authors": [
+    {
+      "name": "Gary Garside",
+      "email": "gary@garygarside.com"
+    },
+    {
+      "name": "Ashley Armsstrong",
+      "email": "ashley@plott.co.uk"
+    }
+  ],
+  "repositories": {
+    "gravity": {
+      "type": "composer",
+      "url": "https://composer.gravity.io"
+    },
+    "0": {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    },
+    "1": {
+      "type": "composer",
+      "url": "https://connect.advancedcustomfields.com"
+    },
+    "2": {"type": "composer", "url": "https://plottcreative.repo.repman.io"}
+  },
+  "require": {
+    "vlucas/phpdotenv": "^5.4",
+    "johnpbloch/wordpress-core-installer": "*",
+    "johnpbloch/wordpress-core": "*",
+    "wpackagist-theme/twentytwentyfive": "*",
+
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "johnpbloch/wordpress-core-installer": true,
+      "ffraenz/private-composer-installer": true,
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "rsync -av --no-times --exclude 'composer.json' --exclude 'wp-content' wp/ ./ && rm -rf wp/\n"
+    ],
+    "post-update-cmd": [
+      "rsync -av --no-times --exclude 'composer.json' --exclude 'wp-content' wp/ ./ && rm -rf wp/\n",
+      "php log_changelog.php"
+    ],
+    "test": [
+      "phpcs"
+    ],
+    "pre-update-cmd": [
+      "php save_composer_lock.php"
+    ]
+  }
+}
