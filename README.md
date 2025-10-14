@@ -31,3 +31,4 @@
    "php save_composer_lock.php"
 ]
 ```
+10. Create `.github/` folder with appropriate workflows.
