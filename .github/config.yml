@@ -1,0 +1,7 @@
+name: 'Site Config'
+description: 'The domain plus TLD and theme settings of the site to deploy'
+
+config:
+  sitepath: '{$live_site_url}/public_html/'
+  themepath: 'wp-content/themes/${live_theme}/'
+  environment: 'production'

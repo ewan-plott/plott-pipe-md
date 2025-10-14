@@ -1,0 +1,230 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  deploy_prod:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Get Site Path
+        id: sitepath
+        uses: KJ002/read-yaml@main
+        with:
+          file: './.github/config.yml'
+          key-path: '["config", "sitepath"]'
+
+      - name: Get Theme Path
+        if: success()
+        id: themepath
+        uses: KJ002/read-yaml@main
+        with:
+          file: './.github/config.yml'
+          key-path: '["config", "themepath"]'
+
+      - name: Get site environment
+        if: success()
+        id: siteenv
+        uses: KJ002/read-yaml@main
+        with:
+          file: './.github/config.yml'
+          key-path: '["config", "environment"]'
+
+      - name: Check Site Folder Existence
+        if: success()
+        id: checksite
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            if [ -d ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }} ]; then
+              echo "Site folder exists."
+              exit 0
+            else
+              echo "Site folder does not exist."
+              exit 1
+            fi
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Check For Git Repository
+        id: checkgitrepo
+        uses: fifsky/ssh-action@master
+        continue-on-error: true
+        with:
+          command: |
+            cd ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}
+            git status
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Create Git Repository
+        id: creategitrepo
+        if: steps.checkgitrepo.outcome == 'failure'
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}
+            echo "Current directory: $(pwd)"
+            echo "Current user: $(whoami)"
+            echo "User groups: $(groups)"
+            echo "Directory permissions: $(ls -ld .)"
+            echo "Directory owner: $(ls -ld . | awk '{print $3":"$4}')"
+            echo ""
+            echo "Attempting to initialize git repository..."
+            
+            if git init 2>/dev/null; then
+              echo "✅ Git init successful!"
+              echo "Adding remote origin..."
+              git remote add origin git@github.com:${{ github.repository }}.git
+              echo "✅ Git repository created successfully"
+            else
+              echo "❌ Git init failed - Permission denied"
+              echo ""
+              echo "==========================================="
+              echo "🏠 HOSTING PROVIDER ACTION REQUIRED"
+              echo "==========================================="
+              echo "Directory: ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}"
+              echo "Current permissions: $(ls -ld . | awk '{print $1" "$3":"$4}')"
+              echo "SSH User: $(whoami)"
+              echo "User Groups: $(groups)"
+              echo ""
+              echo "Please either:"
+              echo "1. Add write permission for 'developers' group: chmod g+w ."
+              echo "2. Add SSH user to 'developers' group"
+              echo "3. Change directory group to SSH user's group"
+              echo "4. Provide alternative Git deployment setup"
+              echo "==========================================="
+              exit 1
+            fi
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: ReCheck For Git Repository
+        id: recheckgitrepo
+        if: always()
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}
+            git status
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Pull Changes
+        id: pullchanges
+        if: steps.recheckgitrepo.outcome == 'success'
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}
+            git checkout main
+            git fetch origin main
+            git reset --hard origin/main
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Create and Update .env File
+        if: steps.pullchanges.outcome == 'success'
+        id: envfile
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cat << 'EOF' > ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}/.env
+            DB_NAME=${{ secrets.DB_NAME_PROD }}
+            DB_USER=${{ secrets.DB_USER_PROD }}
+            DB_PASS=${{ secrets.DB_PASS_PROD }}
+            
+            # Optionally, you can use a data source name (DSN)
+            # When using a DSN, you can remove the DB_NAME, DB_USER, DB_PASSWORD, and DB_HOST variables
+            # DATABASE_URL='mysql://database_user:database_password@database_host:database_port/database_name'
+            
+            # Optional database variables
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PREFIX=${{ secrets.TABLE_PREFIX }}
+            
+            WP_HOME='${ live_site_url }'
+            WP_SITEURL="${WP_HOME}"
+            WP_ENV='production'
+            TABLE_PREFIX=wp_
+            
+            # Specify optional debug.log path
+            # WP_DEBUG_LOG='/path/to/debug.log'
+            
+            # Generate your keys here: https://plott.co.uk/salts.html
+            AUTH_KEY=${{ secrets.AUTH_KEY }}
+            SECURE_AUTH_KEY=${{ secrets.SECURE_AUTH_KEY }}
+            LOGGED_IN_KEY=${{ secrets.LOGGED_IN_KEY }}
+            NONCE_KEY=${{ secrets.NONCE_KEY }}
+            AUTH_SALT=${{ secrets.AUTH_SALT }}
+            SECURE_AUTH_SALT=${{ secrets.SECURE_AUTH_SALT }}
+            LOGGED_IN_SALT=${{ secrets.LOGGED_IN_SALT }}
+            NONCE_SALT=${{ secrets.NONCE_SALT }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            
+            EOF
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Check for Root Composer dependencies
+        if: steps.pullchanges.outcome == 'success'
+        id: checkrootcomposer
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cat ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}composer.json
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Install Root Composer dependencies
+        if: steps.checkrootcomposer.outcome == 'success'
+        id: installrootcomposer
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Build Theme
+        if: steps.installrootcomposer.outcome == 'success'
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd ${{ secrets.PLOTT_ROOT_DIR }}${{ steps.sitepath.outputs.data }}${{ steps.themepath.outputs.data }}
+            npm install --quiet --no-progress --unsafe-perm=true --allow-root
+            npm run prod
+            rm -rf node_modules
+          host: ${{ secrets.SOLO_HOST }}
+          user: ${{ secrets.PLOTTDEPLOY_USER }}
+          key: ${{ secrets.PLOTTDEPLOY_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+
+      - name: Google Chat Notification
+        uses: Co-qn/google-chat-notification@releases/v1
+        with:
+          name: Web Push
+          url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+          status: ${{ job.status }}
+        if: always()
