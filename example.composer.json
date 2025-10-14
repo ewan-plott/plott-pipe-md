@@ -36,7 +36,7 @@
     "allow-plugins": {
       "composer/installers": true,
       "johnpbloch/wordpress-core-installer": true,
-      "ffraenz/private-composer-installer": true,
+      "ffraenz/private-composer-installer": true
     }
   },
   "scripts": {
