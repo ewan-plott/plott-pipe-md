@@ -1,57 +1,60 @@
 {
-  "name": "plottcreative/plottos",
-  "authors": [
+    "name": "plottcreative/plottos",
+    "authors": [
     {
-      "name": "Gary Garside",
-      "email": "gary@garygarside.com"
+        "name": "Gary Garside",
+        "email": "gary@garygarside.com"
     },
     {
-      "name": "Ashley Armsstrong",
-      "email": "ashley@plott.co.uk"
+        "name": "Ashley Armsstrong",
+        "email": "ashley@plott.co.uk"
+    }, {
+        "name": "Ewan Lockwood",
+        "email": "ewan@plott.co.uk"
     }
-  ],
-  "repositories": {
-    "gravity": {
-      "type": "composer",
-      "url": "https://composer.gravity.io"
+    ],
+    "repositories": {
+        "gravity": {
+            "type": "composer",
+            "url": "https://composer.gravity.io"
+        },
+        "0": {
+            "type": "composer",
+            "url": "https://wpackagist.org"
+        },
+        "1": {
+            "type": "composer",
+            "url": "https://connect.advancedcustomfields.com"
+        },
+        "2": {
+            "type": "composer",
+            "url": "https://plottcreative.repo.repman.io"
+        }
     },
-    "0": {
-      "type": "composer",
-      "url": "https://wpackagist.org"
+    "require": {
+        "vlucas/phpdotenv": "^5.4",
+        "johnpbloch/wordpress-core-installer": "^2.0",
+        "johnpbloch/wordpress-core": "6.8.3"
     },
-    "1": {
-      "type": "composer",
-      "url": "https://connect.advancedcustomfields.com"
+    "extra": {
+        "wordpress-install-dir": "wordpress"
     },
-    "2": {"type": "composer", "url": "https://plottcreative.repo.repman.io"}
-  },
-  "require": {
-    "vlucas/phpdotenv": "^5.4",
-    "johnpbloch/wordpress-core-installer": "*",
-    "johnpbloch/wordpress-core": "*",
-    "wpackagist-theme/twentytwentyfive": "*"
-
-  },
-  "config": {
+    "config": {
     "allow-plugins": {
-      "composer/installers": true,
-      "johnpbloch/wordpress-core-installer": true,
-      "ffraenz/private-composer-installer": true
+        "composer/installers": true,
+        "johnpbloch/wordpress-core-installer": true,
+        "ffraenz/private-composer-installer": true
     }
-  },
-  "scripts": {
-    "post-install-cmd": [
-      "rsync -av --no-times --exclude 'composer.json' --exclude 'wp-content' wp/ ./ && rm -rf wp/\n"
-    ],
-    "post-update-cmd": [
-      "rsync -av --no-times --exclude 'composer.json' --exclude 'wp-content' wp/ ./ && rm -rf wp/\n",
-      "php log_changelog.php"
-    ],
-    "test": [
-      "phpcs"
-    ],
-    "pre-update-cmd": [
-      "php save_composer_lock.php"
-    ]
-  }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "[ -d wordpress ] && rsync -rltD --no-times --exclude 'composer.json' --exclude 'wp-content' wordpress/ ./ && rm -rf wordpress/ || true"
+        ],
+        "post-update-cmd": [
+            "[ -d wordpress ] && rsync -rltD --no-times --exclude 'composer.json' --exclude 'wp-content' wordpress/ ./ && rm -rf wordpress/ || true"
+        ],
+        "test": [
+            "phpcs"
+        ]
+    }
 }
