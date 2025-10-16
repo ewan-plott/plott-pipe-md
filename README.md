@@ -57,9 +57,12 @@ Now install your plott [plugins](https://app.repman.io/organization/plottcreativ
 1. Create `.github/` folder ( example found [here](https://github.com/ewan-plott/plott-pipe-md/tree/main/github) ) and set-up appropriate config & workflows ( if taken this github folder remember to rename to `.github` ).
    - update *sitepaths* and *themepaths* 
    - check branch it's pushing to *main* or *master*
-
-2. Set GitHub Repo Secrets and Salts.
+   
 3. Create secure wp-config and .env
+  - Secure [wp-config](https://github.com/ewan-plott/plott-pipe-md/blob/main/wp-config.php)
+    
+2. Set GitHub Repo Secrets and Salts.
+
 4. Update .gitignore
 
 ## PUSH AND TEST!!
