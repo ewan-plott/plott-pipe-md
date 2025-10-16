@@ -1,5 +1,6 @@
 # Legacy Sites > Pipeline
-**Documentation for moving PLOTT Legacy sites onto the pipline**
+
+*Documentation for moving PLOTT Legacy sites onto the pipeline*
 
 ### PULL DOWN
 1. git pull + ftp theme ( re push  if differences )
@@ -60,7 +61,7 @@ Now install your plott [plugins](https://app.repman.io/organization/plottcreativ
    
 3. Create secure wp-config and .env
   - Secure [wp-config](https://github.com/ewan-plott/plott-pipe-md/blob/main/wp-config.php)
-    
+  - If legacy site remove all vulnerable wp-configs [here](https://github.com/ewan-plott/remove-wp-config-across-branches)
 2. Set GitHub Repo Secrets and Salts.
 
 4. Update .gitignore
