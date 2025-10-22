@@ -47,7 +47,7 @@ Run this and attain the token inhouse  (remove '{' in token )
  - `composer config --global --auth http-basic.plottcreative.repo.repman.io token {{ token }}`
 
 Configure PLOTT repman repo
- - `composer config repositories.plott '{"type": "composer", "url": "https://plottcreative.repo.repman.io"}`
+ - `composer config repositories.plott '{"type": "composer", "url": "https://plottcreative.repo.repman.io"}'`
 
 Now install your plott [plugins](https://app.repman.io/organization/plottcreative/package)
  - e.g. `composer require ashleyarmstrong/plott-gf`
