@@ -3,17 +3,21 @@
 *Documentation for moving PLOTT Legacy sites onto the pipeline*
 
 ### PULL DOWN
-1. git pull + ftp theme ( re push  if differences )
-2. export live db
+1. Pull latest code and theme files:
+   - `git pull` to update repository
+   - Download theme files via FTP from live server
+   - If local theme differs from live, re-upload after comparing
+2. Export database from live server
 ---
 ### DDEV
 1. Config DDEV:
    - `DDEV config --project-name={$sitename} --project-type=wordpress`
    - **BEDROCK** `DDEV config --project-name={$sitename} --project-type=wordpress --docroot=web`
 
-2. Install DDEV Adminer
-   - `DDEV add-on get ddev/ddev-adminer` 
-3. Import db
+2. Install DDEV Adminer (database management UI):
+   - `ddev add-on get ddev/ddev-adminer`
+3. Import the exported database:
+   - `ddev import-db --src=backup.sql`
 ---
 ### COMPOSER
 1. Create composer.json ( or use this [example](https://github.com/ewan-plott/plott-pipe-md/blob/main/example.composer.json) ) -
@@ -23,47 +27,66 @@
     "wordpress-install-dir": "wordpress"   // use 'wp' for bedrock
  },
 ```
-2. set require plugins to current versions on the live server
+2. Set required plugins to match live server versions:
+   - Review live server active plugins and their versions
+   - Update the `"require"` section in composer.json to match each plugin version
+   - Example: `"plugin-name/plugin": "1.2.3"`
    
-3. Create [log_changelog](https://github.com/ewan-plott/plott-pipe-md/blob/main/log_changelog.php) php script, and ensure the following exists in the `"scripts"` in your composer.json
+3. Add changelog tracking with `log_changelog.php`:
+   - Copy the [log_changelog.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/log_changelog.php) script to your project root
+   - This script logs all dependency changes during composer updates
+   - Add the following to the `"scripts"` section in your composer.json
    ```
       "post-update-cmd": [
          "php log_changelog.php"
        ],
    ```
    - update `$SITE_ID` & `$SITE_NAME` on lines `22` & `23`
-4. Create [save_composer_lock](https://github.com/ewan-plott/plott-pipe-md/blob/main/save_composer_lock.php) php script, and ensure the following exists in the `"scripts"` in your composer.json
-    
+4. Preserve pre-update state with `save_composer_lock.php`:
+   - Copy the [save_composer_lock.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/save_composer_lock.php) script to your project root
+   - This creates a backup of your current lock file before updates
+   - Add the following to the `"scripts"` section in your composer.json:
    ```
    "pre-update-cmd": [
-   "php save_composer_lock.php"
+      "php save_composer_lock.php"
    ]
    ```
-   Run `composer update` - this will set a .lock with current live version that are now ready to be updated.
+   - Run `composer update` to update all dependencies while preserving version history
 
 ### PLOTT REPMAN
 
-Run this and attain the token inhouse  (remove '{' in token )
- - `composer config --global --auth http-basic.plottcreative.repo.repman.io token {{ token }}`
+1. Obtain authentication token from the team and configure Composer:
+   - `composer config --global --auth http-basic.plottcreative.repo.repman.io token {{REPMAN_TOKEN}}`
+   - Replace `{{REPMAN_TOKEN}}` with the actual token provided
 
-Configure PLOTT repman repo
- - `composer config repositories.plott '{"type": "composer", "url": "https://plottcreative.repo.repman.io"}'`
+2. Configure the Repman repository in Composer:
+   - `composer config repositories.plott '{"type": "composer", "url": "https://plottcreative.repo.repman.io"}'`
+   - This allows Composer to fetch private Plott plugins
 
-Now install your plott [plugins](https://app.repman.io/organization/plottcreative/package)
- - e.g. `composer require ashleyarmstrong/plott-gf`
+3. Install Plott plugins from the registry:
+   - Browse available plugins at [Repman Organization](https://app.repman.io/organization/plottcreative/package)
+   - Example: `composer require ashleyarmstrong/plott-gf`
 
 ---
 
 ### GITHUB WORKFLOWS
-1. Create `.github/` folder ( example found [here](https://github.com/ewan-plott/plott-pipe-md/tree/main/github) ) and set-up appropriate config & workflows ( if taken this github folder remember to rename to `.github` ).
-   - update *sitepaths* and *themepaths* 
-   - check branch it's pushing to *main* or *master*
-   
-3. Create secure wp-config and .env
-  - Secure [wp-config](https://github.com/ewan-plott/plott-pipe-md/blob/main/wp-config.php)
-  - If legacy site remove all vulnerable wp-configs [here](https://github.com/ewan-plott/remove-wp-config-across-branches)
-2. Set GitHub Repo Secrets and Salts.
 
-4. Update .gitignore
+1. Set up GitHub Actions workflows:
+   - Create `.github/workflows/` directory (see [example templates](https://github.com/ewan-plott/plott-pipe-md/tree/main/github))
+   - Copy relevant workflow files to this directory
+   - Update **site paths** and **theme paths** to match your project structure
+   - Verify the target deployment branch (main or master)
+
+2. Configure secure configuration files:
+   - Create a secure [wp-config.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/wp-config.php) with environment variables
+   - Create `.env` file with environment-specific settings (do not commit to repository)
+   - For legacy sites, remove vulnerable wp-config versions: [remove-wp-config-across-branches](https://github.com/ewan-plott/remove-wp-config-across-branches)
+
+3. Add GitHub repository secrets:
+   - Set deployment credentials, API keys, and WordPress salts in GitHub Settings > Secrets
+   - These will be injected into workflows at runtime
+
+4. Update `.gitignore` to prevent committing sensitive files:
+   - Add `.env`, `wp-config.php`, and `composer.lock` (if using dynamic versioning)
 
 ## PUSH AND TEST!!
