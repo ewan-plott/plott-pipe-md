@@ -1,8 +1,6 @@
-# Legacy Sites > Pipeline
+![Header](assets/docs/header.jpg)
 
-*Documentation for moving PLOTT Legacy sites onto the pipeline*
-
-### PULL DOWN
+### PULL LIVE SITE
 1. Pull latest code and theme files:
    - `git pull` to update repository
    - Download theme files via FTP from live server
@@ -89,4 +87,19 @@
 4. Update `.gitignore` to prevent committing sensitive files:
    - Add `.env`, `wp-config.php`, and `composer.lock` (if using dynamic versioning)
 
-## PUSH AND TEST!!
+## Cheatsheet
+
+| Prompt      | Desc.       |
+| ----------- | ----------- |
+| **DDEV** |
+| `DDEV config --project-name={$sitename} --project-type=wordpress`     | DDEV Setup |
+| `DDEV config --project-name={$sitename} --project-type=wordpress --docroot=web`   | DDEV Setup ( Bedrock ) |
+| **Gravity Forms**
+| `composer config http-basic.composer.gravity.io LICENSE_KEY https://SITE_URL` | Gravity Forms AUTH |
+| `composer config repositories.gravity '{"type": "composer", "url": "https://composer.gravity.io"}'` | Gravity Forms Repo |
+| `composer require gravity/gravityforms` | Gravity Forms Plugin |
+| **ACF Pro** |
+| `composer config repositories.acf '{"type": "composer", "url": "https://connect.advancedcustomfields.com"}'` | ACF Pro Repo |
+| `composer require wpengine/advanced-custom-fields-pro` | ACF Pro Plugin |
+| **PLOTT REPMAN** |
+| `composer config repositories.plott '{"type": "composer", "url": "https://plottcreative.repo.repman.io"}'` | Repo |
