@@ -25,12 +25,27 @@
     "wordpress-install-dir": "wordpress"   // use 'wp' for bedrock
  },
 ```
-2. Set required plugins to match live server versions:
+2. **Using MU?**
+     add this alongside the `wordpress-install-dir`:
+   ```
+   "installer-paths": {
+         "PATH_TO_MU_PLUGINS/{$name}/": [
+             "type:wordpress-muplugin",
+         ],
+         "PATH_TO_PLUGINS/{$name}/": [
+             "type:wordpress-plugin"
+         ],
+         "PATH_TO_THEMES/{$name}/": [
+             "type:wordpress-theme"
+         ]
+     },
+   ```
+4. Set required plugins to match live server versions:
    - Review live server active plugins and their versions
    - Update the `"require"` section in composer.json to match each plugin version
    - Example: `"plugin-name/plugin": "1.2.3"`
    
-3. Add changelog tracking with `log_changelog.php`:
+5. Add changelog tracking with `log_changelog.php`:
    - Copy the [log_changelog.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/log_changelog.php) script to your project root
    - This script logs all dependency changes during composer updates
    - Add the following to the `"scripts"` section in your composer.json
@@ -40,7 +55,7 @@
        ],
    ```
    - update `$SITE_ID` & `$SITE_NAME` on lines `22` & `23`
-4. Preserve pre-update state with `save_composer_lock.php`:
+6. Preserve pre-update state with `save_composer_lock.php`:
    - Copy the [save_composer_lock.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/save_composer_lock.php) script to your project root
    - This creates a backup of your current lock file before updates
    - Add the following to the `"scripts"` section in your composer.json:
