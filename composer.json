@@ -14,37 +14,38 @@
     }
     ],
     "repositories": {
+        "acf": {
+            "type": "composer",
+            "url": "https://connect.advancedcustomfields.com"
+        },
         "gravity": {
             "type": "composer",
             "url": "https://composer.gravity.io"
         },
-        "0": {
+        "wpackagist": {
             "type": "composer",
             "url": "https://wpackagist.org"
         },
-        "1": {
-            "type": "composer",
-            "url": "https://connect.advancedcustomfields.com"
-        },
-        "2": {
+        "plott": {
             "type": "composer",
             "url": "https://plottcreative.repo.repman.io"
         }
     },
     "require": {
         "vlucas/phpdotenv": "^5.4",
-        "johnpbloch/wordpress-core-installer": "^2.0",
-        "johnpbloch/wordpress-core": "6.8.3"
+        "plott/plottcore-wordpress": "6.9"
     },
     "extra": {
         "wordpress-install-dir": "wordpress"
     },
     "config": {
     "allow-plugins": {
-        "composer/installers": true,
-        "johnpbloch/wordpress-core-installer": true,
-        "ffraenz/private-composer-installer": true
-    }
+            "composer/installers": true,
+            "johnpbloch/wordpress-core-installer": true,
+            "ffraenz/private-composer-installer": true,
+            "piotrpress/composer-gravityforms": true,
+            "plott/plottcore-wp-installer": true
+        }
     },
     "scripts": {
         "post-install-cmd": [

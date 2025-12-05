@@ -1,51 +1,62 @@
 ![Header](assets/docs/header.jpg)
 
-### PULL LIVE SITE
-1. Pull latest code and theme files:
-   - `git pull` to update repository
-   - Download theme files via FTP from live server
-   - If local theme differs from live, re-upload after comparing
-2. Export database from live server
----
-### DDEV
-1. Config DDEV:
-   - `DDEV config --project-name={$sitename} --project-type=wordpress`
-   - **BEDROCK** `DDEV config --project-name={$sitename} --project-type=wordpress --docroot=web`
 
-2. Install DDEV Adminer (database management UI):
+   - `git clone` to pull down the git repo
+   - download theme files via FTP from live server
+      - push up any descrepancies
+- Export database from live server
+---
+### Using DDEV
+1. Config DDEV:
+   ```bash
+   DDEV config --project-name=SITE_NAME --project-type=wordpress
+   ```
+   **BEDROCK** 
+   ```bash
+   DDEV config --project-name=SITE_NAME --project-type=wordpress --docroot=web
+   ```
+
+2. Install DDEV Adminer:
    - `ddev add-on get ddev/ddev-adminer`
 3. Import the exported database:
-   - `ddev import-db --src=backup.sql`
+   - use `ddev adminer` or `ddev import-db --src=backup.sql`
 ---
 ### COMPOSER
-1. Create composer.json ( or use this [example](https://github.com/ewan-plott/plott-pipe-md/blob/main/example.composer.json) ) -
-   - run `composer require johnpbloch/wordpress-core:{$live_version}` and ensure the following exists below the `"require"` in your composer.json
-```
- "extra": {
-    "wordpress-install-dir": "wordpress"   // use 'wp' for bedrock
- },
-```
-2. **Using MU?**
-     add this alongside the `wordpress-install-dir`:
+
+1. `composer init` ( or use this [example](https://github.com/ewan-plott/plott-pipe-md/blob/main/example.composer.json) )
+
+**Using BEDROCK?**
+
+   change the wordpress-install-dir to:
+   ```json
+   "extra": {
+      "wordpress-install-dir": "wp" 
+   },
    ```
-   "installer-paths": {
-         "PATH_TO_MU_PLUGINS/{$name}/": [
-             "type:wordpress-muplugin",
-         ],
-         "PATH_TO_PLUGINS/{$name}/": [
-             "type:wordpress-plugin"
-         ],
-         "PATH_TO_THEMES/{$name}/": [
-             "type:wordpress-theme"
-         ]
-     },
-   ```
-4. Set required plugins to match live server versions:
-   - Review live server active plugins and their versions
-   - Update the `"require"` section in composer.json to match each plugin version
+
+ **Using MU?**
+
+   add this alongside the `wordpress-install-dir`:
+```json
+"installer-paths": {
+      "PATH_TO_MU_PLUGINS/{$name}/": [
+            "type:wordpress-muplugin",
+      ],
+      "PATH_TO_PLUGINS/{$name}/": [
+            "type:wordpress-plugin"
+      ],
+      "PATH_TO_THEMES/{$name}/": [
+            "type:wordpress-theme"
+      ]
+   },
+```
+## Install all Plugins:
+Review active plugins versions
    - Example: `"plugin-name/plugin": "1.2.3"`
    
-5. Add changelog tracking with `log_changelog.php`:
+---
+
+## Changelog tracking with `log_changelog.php`:
    - Copy the [log_changelog.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/log_changelog.php) script to your project root
    - This script logs all dependency changes during composer updates
    - Add the following to the `"scripts"` section in your composer.json
@@ -55,7 +66,10 @@
        ],
    ```
    - update `$SITE_ID` & `$SITE_NAME` on lines `22` & `23`
-6. Preserve pre-update state with `save_composer_lock.php`:
+
+**REQUIRED FOR ABOVE**
+
+Preserve the `composer.lock`
    - Copy the [save_composer_lock.php](https://github.com/ewan-plott/plott-pipe-md/blob/main/save_composer_lock.php) script to your project root
    - This creates a backup of your current lock file before updates
    - Add the following to the `"scripts"` section in your composer.json:
